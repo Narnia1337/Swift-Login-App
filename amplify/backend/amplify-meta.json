@@ -1,0 +1,58 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-login-dev-dc81f-authRole",
+      "UnauthRoleArn": "arn:aws:iam::853929289133:role/amplify-login-dev-dc81f-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::853929289133:role/amplify-login-dev-dc81f-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-login-dev-dc81f-deployment",
+      "UnauthRoleName": "amplify-login-dev-dc81f-unauthRole",
+      "StackName": "amplify-login-dev-dc81f",
+      "StackId": "arn:aws:cloudformation:us-east-2:853929289133:stack/amplify-login-dev-dc81f/46ca0250-2864-11f0-bac7-0abba5360235",
+      "AmplifyAppId": "dgpthycaj4o7w"
+    }
+  },
+  "auth": {
+    "login4132aa08": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-login-dev-dc81f-deployment/amplify-cfn-templates/auth/login4132aa08-cloudformation-template.json",
+        "logicalId": "authlogin4132aa08"
+      },
+      "lastPushTimeStamp": "2025-05-03T21:30:40.127Z",
+      "output": {
+        "UserPoolId": "us-east-2_8ZrjeUmcN",
+        "AppClientIDWeb": "25le2g02d7vjuq9m6t3tenapm5",
+        "AppClientID": "ihlv3nm1bqj7imb1655k5rms0",
+        "IdentityPoolId": "us-east-2:878fd255-9e1c-4742-a416-a3259b853273",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-2:853929289133:userpool/us-east-2_8ZrjeUmcN",
+        "IdentityPoolName": "login4132aa08_identitypool_4132aa08__dev",
+        "UserPoolName": "login4132aa08_userpool_4132aa08"
+      },
+      "lastPushDirHash": "O2XJf7AfkTftORC69LLHSMa10qo="
+    }
+  }
+}
