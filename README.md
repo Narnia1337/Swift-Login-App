@@ -53,20 +53,25 @@ amplify configure
 
 🚀 Getting Started
 	1.	Clone this repository
-
+ 
+```
 git clone https://github.com/Narnia1337/myloginapp.git
 cd myloginapp/login
+```
 
 
-	2.	Install backend config
+Install backend config
+
 If you already have amplifyconfiguration.json and awsconfiguration.json, skip this.
 Otherwise pull your Amplify environment:
 
+```
 amplify pull --appId YOUR_AMPLIFY_APP_ID --envName dev --restore
+```
 
 Replace YOUR_AMPLIFY_APP_ID with your Amplify App ID (found in the Amplify Console).
 
-	3.	Open in Xcode
+Open in Xcode
 
 open Login.xcodeproj
 
@@ -74,8 +79,8 @@ or if you use a workspace:
 
 open Login.xcworkspace
 
+Resolve Swift Packages
 
-	4.	Resolve Swift Packages
 In Xcode go to File → Swift Packages → Resolve Package Versions.
 
 ⸻
@@ -89,7 +94,7 @@ In Xcode go to File → Swift Packages → Resolve Package Versions.
 	•	Forgot Password → reset flow → auto-login
 
 ⸻
-
+```
 🔧 Project Structure
 
 login/
@@ -106,15 +111,17 @@ login/
 ├─ amplifyconfiguration.json
 ├─ awsconfiguration.json
 └─ Login.xcodeproj
-
-	•	Views/ – All SwiftUI screens & shared UI components
-	•	Services/ – Amplify wrapper, session management, keychain helper
-	•	Amplify config – Backend settings for Cognito
+```
+	
+ Views/ – All SwiftUI screens & shared UI components	
+ Services/ – Amplify wrapper, session management, keychain helper
+ Amplify config – Backend settings for Cognito
 
 ⸻
 
 🔑 Amplify & AWS Setup
 	1.	In your app’s @main struct, initialize Amplify:
+ ```
 
 import Amplify
 import AWSCognitoAuthPlugin
@@ -138,12 +145,14 @@ struct LoginApp: App {
     }
   }
 }
+```
 
 
-	2.	Push backend changes whenever you modify amplify/backend:
+Push backend changes whenever you modify amplify/backend:
 
+```
 amplify push
-
+```
 
 
 ⸻
