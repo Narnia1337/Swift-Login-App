@@ -1,24 +1,23 @@
-//
-//  ContentView.swift
-//  login
-//
-//  Created by Devesh Bulani on 5/3/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+    @EnvironmentObject var sessionManager: SessionManager
 
-#Preview {
-    ContentView()
+    var body: some View {
+        NavigationView {
+            Group {
+                if sessionManager.isSignedIn {
+                    VStack(spacing: 20) {
+                        Text("Welcome, \(sessionManager.username)")
+                        Button("Sign Out") {
+                            sessionManager.signOut()
+                        }
+                    }
+                } else {
+                    LoginView()
+                }
+            }
+            .navigationTitle("Login")
+        }
+    }
 }
