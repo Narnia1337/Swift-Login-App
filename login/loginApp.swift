@@ -16,7 +16,7 @@ struct loginApp: App {
             try Amplify.configure()
             print("✅ Amplify configured")
         } catch {
-            print("⚠️ Amplify failed: \(error)")
+            print("Failed: \(error)")
         }
     }
 

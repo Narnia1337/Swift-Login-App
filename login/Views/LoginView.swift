@@ -1,5 +1,3 @@
-// LoginView.swift
-
 import SwiftUI
 
 struct LoginView: View {
@@ -129,7 +127,8 @@ struct LoginView: View {
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showForgotFlow) {
-                ForgotPasswordView(email: email)
+                // ForgotPasswordView now has no init parameters
+                ForgotPasswordView()
                     .environmentObject(sessionManager)
             }
         }

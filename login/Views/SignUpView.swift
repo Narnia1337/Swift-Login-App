@@ -5,115 +5,169 @@ import SwiftUI
 struct SignUpView: View {
     @EnvironmentObject var sessionManager: SessionManager
 
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var confirmPassword: String = ""
-    @State private var isPasswordVisible = false
+    @State private var email                  = ""
+    @State private var password               = ""
+    @State private var confirmPassword        = ""
+    @State private var code                   = ""
+    @State private var isPasswordVisible      = false
     @State private var isConfirmPasswordVisible = false
-    @State private var showConfirm = false
-    @State private var isLoading = false
-    @State private var alertMessage = ""
+    @State private var showConfirmationFields = false
+    @State private var isLoading              = false
+    @State private var alertMessage           = ""
 
-    // Animation
-    @State private var fieldOffset: CGFloat = 30
-    @State private var buttonOffset: CGFloat = 60
-    @State private var opacity: Double = 0
+    // resend‐code timer
+    @State private var timeRemaining   = 60
+    @State private var timerActive     = false
+    @State private var timer: Timer?   = nil
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                BackgroundGradient()
-                ScrollView {
-                    VStack(spacing: 25) {
-                        HeaderView(title: "Create Account",
-                                   subtitle: "Sign up to get started")
+        ZStack {
+            BackgroundGradient()
+            ScrollView {
+                VStack(spacing: 25) {
+                    HeaderView(
+                        title: showConfirmationFields ? "Verify Email" : "Create Account",
+                        subtitle: showConfirmationFields
+                            ? "Enter code sent to\n\(email)"
+                            : "Sign up to get started"
+                    )
 
-                        VStack(spacing: 20) {
-                            CustomTextField(
-                                placeholder: "Email",
-                                text: $email,
-                                icon: "envelope.fill"
-                            )
-                            .offset(y: fieldOffset)
-                            .opacity(opacity)
+                    // Email
+                    CustomTextField(placeholder: "Email", text: $email, icon: "envelope.fill")
 
-                            CustomSecureField(
-                                placeholder: "Password",
-                                text: $password,
-                                isVisible: $isPasswordVisible
-                            )
-                            .offset(y: fieldOffset)
-                            .opacity(opacity)
+                    if !showConfirmationFields {
+                        // Password
+                        CustomSecureField(
+                            placeholder: "Password",
+                            text: $password,
+                            isVisible: $isPasswordVisible
+                        )
 
-                            if !showConfirm {
-                                CustomSecureField(
-                                    placeholder: "Re-enter Password",
-                                    text: $confirmPassword,
-                                    isVisible: $isConfirmPasswordVisible
-                                )
-                                .offset(y: fieldOffset)
-                                .opacity(opacity)
-                            }
+                        // Confirm password
+                        CustomSecureField(
+                            placeholder: "Re-enter Password",
+                            text: $confirmPassword,
+                            isVisible: $isConfirmPasswordVisible
+                        )
+                    } else {
+                        // Verification code
+                        CustomTextField(
+                            placeholder: "Verification Code",
+                            text: $code,
+                            icon: "key.fill"
+                        )
 
-                            if showConfirm {
-                                CustomTextField(
-                                    placeholder: "Verification Code",
-                                    text: $confirmPassword, // reuse or separate code var
-                                    icon: "key.fill"
-                                )
-                                .offset(y: fieldOffset)
-                                .opacity(opacity)
-                            }
-
-                            Button(action: signUpOrConfirm) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white)
-                                        .frame(height: 56)
-                                    if isLoading {
-                                        ProgressView().scaleEffect(1.5)
-                                    } else {
-                                        Text(showConfirm ? "Confirm" : "Sign Up")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(Color(red: 0.925, green: 0.235, blue: 0.102))
-                                    }
-                                }
-                            }
-                            .disabled(isLoading)
-                            .offset(y: buttonOffset)
-                            .opacity(opacity)
-                            .alert(isPresented: .constant(!alertMessage.isEmpty)) {
-                                Alert(
-                                    title: Text("Error"),
-                                    message: Text(alertMessage),
-                                    dismissButton: .default(Text("OK")) { alertMessage = "" }
-                                )
-                            }
-
-                            NavigationLink("Already have an account? Sign In",
-                                           destination: LoginView())
-                                .offset(y: buttonOffset)
-                                .opacity(opacity)
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                        if timerActive {
+                            Text("Resend code in \(timeRemaining)s")
+                                .foregroundColor(.white.opacity(0.8))
+                        } else {
+                            Button("Resend Code") { sendSignUpCode() }
+                                .foregroundColor(.white.opacity(0.8))
                         }
-                        .padding(.horizontal, 25)
                     }
-                    .padding(.bottom, 50)
+
+                    // Signup / Confirm button
+                    Button(showConfirmationFields ? "Confirm" : "Sign Up") {
+                        showConfirmationFields ? confirmSignUp() : startSignUp()
+                    }
+                    .buttonStyle(RoundedButtonStyle())
+                    .disabled(isLoading)
+                    .alert(isPresented: .constant(!alertMessage.isEmpty)) {
+                        Alert(
+                            title: Text("Error"),
+                            message: Text(alertMessage),
+                            dismissButton: .default(Text("OK")) { alertMessage = "" }
+                        )
+                    }
+
+                    NavigationLink(
+                        "Already have an account? Sign In",
+                        destination: LoginView().environmentObject(sessionManager)
+                    )
+                    .foregroundColor(.white.opacity(0.8))
                 }
+                .padding(.horizontal, 25)
+                .padding(.bottom, 50)
             }
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.8)) {
-                    opacity = 1
-                    fieldOffset = 0
-                    buttonOffset = 0
-                }
-            }
-            .navigationBarHidden(true)
+        }
+        .onAppear {
+            // nothing extra
         }
     }
 
-    private func signUpOrConfirm() {
-        // your existing sign-up & confirm logic
+    private func startSignUp() {
+        guard password == confirmPassword else {
+            alertMessage = "Passwords do not match"
+            return
+        }
+        isLoading = true
+        AuthService.signUp(email: email, username: email, password: password) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    showConfirmationFields = true
+                    startTimer()
+                case .failure(let err):
+                    alertMessage = err.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func confirmSignUp() {
+        isLoading = true
+        AuthService.confirmSignUp(username: email, code: code) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    AuthService.signIn(usernameOrEmail: email, password: password) { signInResult in
+                        DispatchQueue.main.async {
+                            isLoading = false
+                            switch signInResult {
+                            case .success(true):
+                                sessionManager.update(user: email, signedIn: true)
+                            case .success:
+                                alertMessage = "Sign-in failed"
+                            case .failure(let err):
+                                alertMessage = err.localizedDescription
+                            }
+                        }
+                    }
+                case .failure(let err):
+                    isLoading = false
+                    alertMessage = err.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func sendSignUpCode() {
+        isLoading = true
+        AuthService.resendSignUpCode(username: email) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    startTimer()
+                case .failure(let err):
+                    alertMessage = err.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func startTimer() {
+        timeRemaining = 60
+        timerActive   = true
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { t in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                timerActive = false
+                t.invalidate()
+            }
+        }
     }
 }
