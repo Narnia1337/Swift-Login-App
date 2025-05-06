@@ -1,4 +1,4 @@
-# MyLoginApp
+# Swift-Login-App
 
 A SwiftUI iOS application demonstrating AWS Amplify–powered authentication flows:
 
